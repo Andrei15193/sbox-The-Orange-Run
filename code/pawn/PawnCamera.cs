@@ -2,13 +2,13 @@ using Sandbox;
 using System;
 using System.Linq;
 
-namespace MyGame;
+namespace TheOrangeRun;
 
 public partial class PawnCamera : EntityComponent<Pawn>, ISingletonComponent
 {
     protected float WheelSpeed => 30f;
     protected Vector2 CameraDistance => new( 125, 1000 );
-    protected Vector2 PitchClamp => new( 30, 60 );
+    protected Vector2 PitchClamp => new( 10, 45 );
 
     float OrbitDistance = 400f;
     float TargetOrbitDistance = 400f;

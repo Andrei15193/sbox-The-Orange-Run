@@ -1,7 +1,8 @@
 ﻿using Sandbox;
 using System.ComponentModel;
+using TheOrangeRun.UI;
 
-namespace MyGame;
+namespace TheOrangeRun;
 
 public partial class Pawn : AnimatedEntity
 {
@@ -52,9 +53,14 @@ public partial class Pawn : AnimatedEntity
         );
     }
 
-    [BindComponent] public PawnController Controller { get; }
-    [BindComponent] public PawnAnimator Animator { get; }
-    [BindComponent] public PawnCamera Camera { get; }
+    [BindComponent]
+    public PawnController Controller { get; }
+
+    [BindComponent]
+    public PawnAnimator Animator { get; }
+
+    [BindComponent]
+    public PawnCamera Camera { get; }
 
     public override Ray AimRay => new Ray( EyePosition, EyeRotation.Forward );
 
@@ -94,6 +100,11 @@ public partial class Pawn : AnimatedEntity
     public override void BuildInput()
     {
         Camera?.BuildInput();
+
+        if ( Input.Pressed( "scoreScreen" ) )
+            TheOrangeRunGameManager.RootPanel.IsScoreScreenVisible = true;
+        if ( Input.Released( "scoreScreen" ) )
+            TheOrangeRunGameManager.RootPanel.IsScoreScreenVisible = false;
     }
 
     public override void FrameSimulate( IClient cl )

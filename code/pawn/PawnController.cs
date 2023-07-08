@@ -1,8 +1,9 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
+using TheOrangeRun.UI;
 
-namespace MyGame;
+namespace TheOrangeRun;
 
 public class PawnController : EntityComponent<Pawn>
 {
@@ -15,7 +16,7 @@ public class PawnController : EntityComponent<Pawn>
 
     bool Grounded => Entity.GroundEntity.IsValid();
 
-    public void Simulate( IClient cl )
+    public void Simulate( IClient client )
     {
         ControllerEvents.Clear();
 
@@ -23,6 +24,9 @@ public class PawnController : EntityComponent<Pawn>
         var angles = Camera.Rotation.Angles().WithPitch( 0 );
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
+
+        if ( Input.Pressed( "attack1" ) )
+            TheOrangeRunGameManager.Current.AddOrangeTo( client );
 
         if ( groundEntity.IsValid() )
         {
@@ -32,7 +36,7 @@ public class PawnController : EntityComponent<Pawn>
                 AddEvent( "grounded" );
             }
 
-            Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 200.0f * ( Input.Down( "run" ) ? 2.5f : 1f ), 7.5f );
+            Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 200.0f * (Input.Down( "run" ) ? 2.5f : 1f), 7.5f );
             Entity.Velocity = ApplyFriction( Entity.Velocity, 4.0f );
         }
         else
@@ -102,8 +106,10 @@ public class PawnController : EntityComponent<Pawn>
 
         // scale the velocity
         float newspeed = speed - drop;
-        if ( newspeed < 0 ) newspeed = 0;
-        if ( newspeed == speed ) return input;
+        if ( newspeed < 0 )
+            newspeed = 0;
+        if ( newspeed == speed )
+            return input;
 
         newspeed /= speed;
         input *= newspeed;
@@ -151,10 +157,14 @@ public class PawnController : EntityComponent<Pawn>
         // Now trace down from a known safe position
         trace = Entity.TraceBBox( start, end );
 
-        if ( trace.Fraction <= 0 ) return position;
-        if ( trace.Fraction >= 1 ) return position;
-        if ( trace.StartedSolid ) return position;
-        if ( Vector3.GetAngle( Vector3.Up, trace.Normal ) > GroundAngle ) return position;
+        if ( trace.Fraction <= 0 )
+            return position;
+        if ( trace.Fraction >= 1 )
+            return position;
+        if ( trace.StartedSolid )
+            return position;
+        if ( Vector3.GetAngle( Vector3.Up, trace.Normal ) > GroundAngle )
+            return position;
 
         return trace.EndPosition;
     }

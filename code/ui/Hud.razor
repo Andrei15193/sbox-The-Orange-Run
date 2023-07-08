@@ -1,27 +1,53 @@
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
 @using Sandbox;
 @using Sandbox.UI;
+@using TheOrangeRun.UI;
 
-@namespace MyGame
+@namespace TheOrangeRun.UI
 @inherits RootPanel
 @attribute [StyleSheet]
 
 <root>
-    <ChatBox/>
-    <VoiceList/>
+    <ChatBox />
+    <VoiceList />
 
     <div class="pointer-visible" />
 
     <div class="header">
-        <label>Top Down Game</label>
-        <label class="subtitle">A template to kick start the production of your own games.</label>
+        <label>The Orange Run</label>
+        <label class="subtitle">Collect oranges.</label>
     </div>
+
+    @if (IsScoreScreenVisible)
+    {
+        <table class="users-list">
+            <tr>
+                <th>Player</th>
+                <th>Oranges</th>
+            </tr>
+            @foreach (var userAndOranges in TheOrangeRunGameManager.Current.PawnsStats)
+            {
+                <tr>
+                    <td>@userAndOranges.Name</td>
+                    <td>@userAndOranges.Oranges</td>
+                </tr>
+            }
+        </table>
+    }
 </root>
 
 @code
 {
+    public bool IsScoreScreenVisible { get; set; }
+
+    protected override int BuildHash()
+        => HashCode.Combine(IsScoreScreenVisible, TheOrangeRunGameManager.Current.PawnsStats.Aggregate(0, (previous, pawnStats) => HashCode.Combine(previous, pawnStats.Name, pawnStats.Oranges)));
+
     public override void Tick()
     {
         var devCam = Game.LocalClient.Components.Get<DevCamera>();
-        SetClass( "camera-movement", Input.UsingController || Input.Down( "attack2" ) || devCam is not null );
+        SetClass("camera-movement", Input.UsingController || Input.Down("attack2") || devCam is not null);
     }
 }
