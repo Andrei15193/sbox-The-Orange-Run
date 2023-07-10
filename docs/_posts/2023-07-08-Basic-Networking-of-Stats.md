@@ -172,6 +172,6 @@ public partial class TheOrangeRunGameManager : GameManager
 ```
 
 This property is based on the one from the base class so at all times, both will point to the exact same instance.
-The effect is that when using a more specific class, in this case `TheOrangeRunGameManager`, we get the instance
-of that specific type rather than base class type. This should save some explicit casting whenever we need to
-access the game manager instance.
+The effect is that when using a more specific class name, in this case `TheOrangeRunGameManager`, we get the
+instance of that specific type rather than base class type. This should save some explicit casting whenever we
+need to access the game manager instance.
