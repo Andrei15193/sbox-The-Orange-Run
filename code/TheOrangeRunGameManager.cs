@@ -49,7 +49,7 @@ public partial class TheOrangeRunGameManager : GameManager
             hasValue = pawnStats.MoveNext();
 
         if ( hasValue )
-            pawnStats.Current.Oranges++;
+            pawnStats.Current.TotalOranges++;
     }
 
     public override void ClientDisconnect( IClient client, NetworkDisconnectionReason reason )
@@ -71,7 +71,13 @@ public partial class TheOrangeRunGameManager : GameManager
     public override void ClientJoined( IClient client )
     {
         base.ClientJoined( client );
-        PawnsStats.Add( new PawnStats { Id = client.Id, Name = client.Name, Oranges = 0 } );
+        PawnsStats.Add( new PawnStats { Id = client.Id, Name = client.Name, TotalOranges = 0 } );
+
+        var orangeSpawnPoint = All.OfType<SpawnPoint>().First();
+        var orange = new Orange
+        {
+            BasePosition = orangeSpawnPoint.Position + Vector3.Up * 20
+        };
 
         ChatBox.Say( client.Name + " has joined the game..." );
 

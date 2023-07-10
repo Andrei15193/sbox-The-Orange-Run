@@ -1,6 +1,5 @@
 ﻿using Sandbox;
 using System.ComponentModel;
-using TheOrangeRun.UI;
 
 namespace TheOrangeRun;
 
@@ -70,6 +69,8 @@ public partial class Pawn : AnimatedEntity
     public override void Spawn()
     {
         SetModel( "models/citizen/citizen.vmdl" );
+        SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+        Tags.Add( "player" );
 
         EnableDrawing = true;
         EnableHideInFirstPerson = true;

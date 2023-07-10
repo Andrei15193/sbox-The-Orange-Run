@@ -26,7 +26,7 @@
     "LeaderboardType": "None",
     "GameCategory": "TechDemos",
     "ProjectTemplate": null,
-    "CsProjName": "",
+    "CsProjName": "TheOrangeRun",
     "ControlModes": {},
     "InputSettings": {
       "Actions": [
@@ -211,7 +211,7 @@
       ]
     },
     "Compiler": {
-      "RootNamespace": "Sandbox",
+      "RootNamespace": "TheOrangeRun",
       "DefineConstants": "SANDBOX;ADDON;DEBUG",
       "NoWarn": "1701;1702;1591;",
       "ReleaseMode": "Release",

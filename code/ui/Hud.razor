@@ -31,7 +31,7 @@
             {
                 <tr>
                     <td>@userAndOranges.Name</td>
-                    <td>@userAndOranges.Oranges</td>
+                    <td>@userAndOranges.TotalOranges</td>
                 </tr>
             }
         </table>
@@ -43,7 +43,7 @@
     public bool IsScoreScreenVisible { get; set; }
 
     protected override int BuildHash()
-        => HashCode.Combine(IsScoreScreenVisible, TheOrangeRunGameManager.Current.PawnsStats.Aggregate(0, (previous, pawnStats) => HashCode.Combine(previous, pawnStats.Name, pawnStats.Oranges)));
+        => HashCode.Combine(IsScoreScreenVisible, TheOrangeRunGameManager.Current.PawnsStats.Aggregate(0, (previous, pawnStats) => HashCode.Combine(previous, pawnStats.Name, pawnStats.TotalOranges)));
 
     public override void Tick()
     {

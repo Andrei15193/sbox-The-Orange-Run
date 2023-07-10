@@ -4,10 +4,6 @@ namespace TheOrangeRun
 {
     public partial class PawnStats : BaseNetworkable
     {
-        public PawnStats()
-        {
-        }
-
         [Net]
         public int Id { get; set; }
 
@@ -15,6 +11,6 @@ namespace TheOrangeRun
         public string Name { get; set; }
 
         [Net]
-        public int Oranges { get; set; }
+        public int TotalOranges { get; set; }
     }
 }
