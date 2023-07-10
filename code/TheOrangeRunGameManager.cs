@@ -43,26 +43,9 @@ public partial class TheOrangeRunGameManager : GameManager
 
     public void AddOrangeTo( IClient client )
     {
-        using var pawnStats = PawnsStats.GetEnumerator();
-        var hasValue = pawnStats.MoveNext();
-        while ( hasValue && pawnStats.Current.Id != client.Id )
-            hasValue = pawnStats.MoveNext();
-
-        if ( hasValue )
-            pawnStats.Current.TotalOranges++;
-    }
-
-    public override void ClientDisconnect( IClient client, NetworkDisconnectionReason reason )
-    {
-        base.ClientDisconnect( client, reason );
-
-        var statsIndex = 0;
-        using ( var pawnStats = PawnsStats.GetEnumerator() )
-            while ( pawnStats.MoveNext() && pawnStats.Current.Id != client.Id )
-                statsIndex++;
-
-        if ( statsIndex < PawnsStats.Count )
-            PawnsStats.RemoveAt( statsIndex );
+        var pawnStats = PawnsStats.FirstOrDefault( pawnStats => pawnStats.Id == client.Id );
+        if ( pawnStats is not null )
+            pawnStats.TotalOranges++;
     }
 
     /// <summary>
@@ -100,5 +83,18 @@ public partial class TheOrangeRunGameManager : GameManager
             tx.Position = tx.Position + Vector3.Up * 50.0f; // raise it up
             pawn.Transform = tx;
         }
+    }
+
+    public override void ClientDisconnect( IClient client, NetworkDisconnectionReason reason )
+    {
+        base.ClientDisconnect( client, reason );
+
+        var statsIndex = 0;
+        using ( var pawnStats = PawnsStats.GetEnumerator() )
+            while ( pawnStats.MoveNext() && pawnStats.Current.Id != client.Id )
+                statsIndex++;
+
+        if ( statsIndex < PawnsStats.Count )
+            PawnsStats.RemoveAt( statsIndex );
     }
 }
