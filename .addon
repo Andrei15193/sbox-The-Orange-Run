@@ -1,7 +1,7 @@
 {
   "Title": "The Orange Run",
   "Type": "game",
-  "Org": "local",
+  "Org": "orangebox",
   "Ident": "the_orange_run",
   "Tags": "orange run game collect multiplayer friends",
   "Schema": 1,
@@ -217,6 +217,7 @@
       "ReleaseMode": "Release",
       "References": [],
       "DistinctReferences": []
-    }
+    },
+    "TickRate": 50
   }
 }
