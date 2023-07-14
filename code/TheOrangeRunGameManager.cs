@@ -48,6 +48,25 @@ public partial class TheOrangeRunGameManager : GameManager
             pawnStats.TotalOranges++;
     }
 
+    public void CollectOrange( Orange orange, Pawn pawn)
+    {
+        if ( Game.IsServer && orange.IsValid && pawn.IsValid)
+        {
+            var pawnStats = PawnsStats.FirstOrDefault( pawnStats => pawnStats.Id == pawn.Client.Id );
+            if ( pawnStats is not null )
+            {
+                pawnStats.TotalOranges++;
+                orange.Delete();
+
+                var orangeSpawnPoint = All.OfType<SpawnPoint>().OrderBy( _ => Guid.NewGuid() ).First();
+                var newOrange = new Orange
+                {
+                    BasePosition = orangeSpawnPoint.Position + Vector3.Up * 20
+                };
+            }
+        }
+    }
+
     /// <summary>
     /// A client has joined the server. Make them a pawn to play with
     /// </summary>

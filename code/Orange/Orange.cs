@@ -10,13 +10,11 @@ public class Orange : ModelEntity
     public override void Spawn()
     {
         base.Spawn();
-        // Model = Cloud.Model( "rust.orange" );
-        SetModel( "models/citizen_props/crate01.vmdl" );
+        Model = Cloud.Model( "rust.orange" );
         Scale = 2;
-        SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+        SetupPhysicsFromCylinder( PhysicsMotionType.Keyframed, new Capsule( Vector3.Zero, Vector3.Up * 5, 5 ) );
         Tags.Add( "trigger" );
 
-        // PhysicsEnabled = true;
         EnableTouch = true;
     }
 
@@ -33,18 +31,8 @@ public class Orange : ModelEntity
     public override void StartTouch( Entity other )
     {
         base.StartTouch( other );
-        Log.Info( "StartTouch" );
-    }
 
-    public override void Touch( Entity other )
-    {
-        base.Touch( other );
-        Log.Info( "Touch" );
-    }
-
-    public override void EndTouch( Entity other )
-    {
-        base.EndTouch( other );
-        Log.Info( "EndTouch" );
+        if ( other is Pawn pawn )
+            TheOrangeRunGameManager.Current.CollectOrange( this, pawn);
     }
 }
