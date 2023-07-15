@@ -25,9 +25,6 @@ public class PawnController : EntityComponent<Pawn>
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
 
-        if ( Input.Pressed( "attack1" ) )
-            TheOrangeRunGameManager.Current.AddOrangeTo( client );
-
         if ( groundEntity.IsValid() )
         {
             if ( !Grounded )

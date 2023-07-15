@@ -7,7 +7,7 @@
   "Schema": 1,
   "HasAssets": true,
   "AssetsPath": "",
-  "Resources": null,
+  "Resources": "",
   "MenuResources": null,
   "HasCode": true,
   "CodePath": "/code/",
@@ -19,7 +19,7 @@
     "GameNetworkType": "Multiplayer",
     "MapSelect": "Official",
     "MapList": [
-      "facepunch.construct"
+      "facepunch.square"
     ],
     "RankType": "None",
     "PerMapRanking": false,
@@ -218,6 +218,18 @@
       "References": [],
       "DistinctReferences": []
     },
-    "TickRate": 50
+    "TickRate": 50,
+    "LaunchConfigs": [
+      {
+        "Name": "The Orange Run Config",
+        "GameIdent": "orangebox.the_orange_run#local",
+        "MapName": "facepunch.square",
+        "MaxPlayers": 8,
+        "GameSettings": {},
+        "Addons": "",
+        "PreLaunchCommand": "",
+        "PostLaunchCommand": ""
+      }
+    ]
   }
 }

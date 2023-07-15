@@ -1,11 +1,13 @@
 ﻿using Sandbox;
 using System;
 
-namespace TheOrangeRun;
+namespace TheOrangeRun.Oranges;
 
 public class Orange : ModelEntity
 {
     private Vector3 _basePosition;
+
+    public event EventHandler Collected;
 
     public override void Spawn()
     {
@@ -33,6 +35,9 @@ public class Orange : ModelEntity
         base.StartTouch( other );
 
         if ( other is Pawn pawn )
-            TheOrangeRunGameManager.Current.CollectOrange( this, pawn);
+        {
+            Collected?.Invoke( this, EventArgs.Empty );
+            TheOrangeRunGameManager.Current.CollectOrange( this, pawn );
+        }
     }
 }
