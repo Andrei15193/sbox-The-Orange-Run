@@ -40,11 +40,30 @@ public partial class TheOrangeRunGameManager : GameManager
 
     public const float DefaultSpawnDelay = 1;
 
+    public SoundscapeRadiusEntity AmbianceSoundscape { get; private set; }
+
     [GameEvent.Entity.PostSpawn]
     internal void MakeWorkd()
     {
         Log.Info( nameof( TheOrangeRunGameManager ) + "." + nameof( MakeWorkd ) );
 
+        InitializeSoundScapes();
+        InitializeOrangeSpawners();
+        StartGame();
+    }
+
+    private void InitializeSoundScapes()
+    {
+        AmbianceSoundscape = new SoundscapeRadiusEntity
+        {
+            Soundscape = "assets/sounds/mixkit/ambiance.sndscape",
+            Position = new Vector3( 985f, 2220f, 0f ),
+            Radius = 230
+        };
+    }
+
+    private void InitializeOrangeSpawners()
+    {
         OrangeSpawners = new[]
         {
             // Spawn building front
@@ -421,8 +440,6 @@ public partial class TheOrangeRunGameManager : GameManager
                 DelayInSeconds = DefaultSpawnDelay
             },
         };
-
-        StartGame();
     }
 
     internal void StartGame()

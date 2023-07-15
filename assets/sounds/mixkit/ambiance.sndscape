@@ -1,0 +1,10 @@
+{
+  "MasterVolume": "1.00,1.00,0",
+  "LoopedSounds": [
+    {
+      "SoundFile": "addon/sounds/mixkit-sub-urban-ambience-and-birds-371.vsnd",
+      "Volume": "0.30,0.30,0"
+    }
+  ],
+  "StingSounds": []
+}
