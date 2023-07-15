@@ -1,7 +1,7 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
-using TheOrangeRun.UI;
+using System.Linq;
 
 namespace TheOrangeRun;
 
@@ -20,7 +20,13 @@ public class PawnController : EntityComponent<Pawn>
     {
         ControllerEvents.Clear();
 
-        var movement = Entity.InputDirection.Normal;
+        if ( Entity.Position.z < -7000f )
+        {
+            Entity.Position = Sandbox.Entity.All.OfType<SpawnPoint>().First().Position;
+            return;
+        }
+
+            var movement = Entity.InputDirection.Normal;
         var angles = Camera.Rotation.Angles().WithPitch( 0 );
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
@@ -52,10 +58,11 @@ public class PawnController : EntityComponent<Pawn>
 
         if ( mh.TryMoveWithStep( Time.Delta, StepSize ) > 0 )
         {
-            if ( Grounded )
-            {
-                mh.Position = StayOnGround( mh.Position );
-            }
+            Entity.Position = Grounded ? StayOnGround( mh.Position ) : mh.Position;
+            Entity.Velocity = mh.Velocity;
+        }
+        else if ( mh.TryUnstuck() )
+        {
             Entity.Position = mh.Position;
             Entity.Velocity = mh.Velocity;
         }
@@ -66,9 +73,7 @@ public class PawnController : EntityComponent<Pawn>
     void DoJump()
     {
         if ( Grounded )
-        {
             Entity.Velocity = ApplyJump( Entity.Velocity, "jump" );
-        }
     }
 
     Entity CheckForGround()
