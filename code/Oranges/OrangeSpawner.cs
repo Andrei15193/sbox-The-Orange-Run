@@ -2,6 +2,7 @@
 
 namespace TheOrangeRun.Oranges
 {
+    [Category("Spawners")]
     public class OrangeSpawner : Entity
     {
         private bool _isActive = false;

@@ -3,32 +3,35 @@ using System;
 
 namespace TheOrangeRun.Oranges;
 
+[Category("Pickups")]
 public class Orange : ModelEntity
 {
-    private Vector3 _basePosition;
+    private readonly float _positionOffset = Random.Shared.Float( 0, (float)(2 * Math.PI) );
+    private readonly float _rotationOffset = Random.Shared.Float( 0, 365 );
 
     public event EventHandler Collected;
 
     public override void Spawn()
     {
         base.Spawn();
+
         Model = Cloud.Model( "rust.orange" );
-        Scale = 2;
+        Scale = 3;
         SetupPhysicsFromCylinder( PhysicsMotionType.Keyframed, new Capsule( Vector3.Zero, Vector3.Up * 5, 5 ) );
         Tags.Add( "trigger" );
 
         EnableTouch = true;
+        Rotation = Rotation.RotateAroundAxis( Vector3.Up, _rotationOffset );
     }
 
-    public Vector3 BasePosition
-    {
-        get => _basePosition;
-        set => Position = _basePosition = value;
-    }
+    public Vector3 BasePosition { get; set; }
 
     [GameEvent.Tick.Server]
-    public void Tick()
-        => Position = BasePosition + Vector3.Up * 10 * ((float)Math.Sin( Time.Now * 2 ) + 1);
+    protected void OnServerTick()
+    {
+        Position = BasePosition + Vector3.Up * 10 * ((float)Math.Sin( _positionOffset + Time.Now * 2 ) + 1);
+        Rotation = Rotation.RotateAroundAxis( Vector3.Up, Time.Delta * 70 );
+    }
 
     public override void StartTouch( Entity other )
     {

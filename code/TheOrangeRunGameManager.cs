@@ -9,13 +9,6 @@ using TheOrangeRun.UI;
 
 namespace TheOrangeRun;
 
-/// <summary>
-/// This is your game class. This is an entity that is created serverside when
-/// the game starts, and is replicated to the client. 
-/// 
-/// You can use this to create things like HUDs and declare which player class
-/// to use for spawned players.
-/// </summary>
 public partial class TheOrangeRunGameManager : GameManager
 {
     public static new TheOrangeRunGameManager Current
@@ -29,9 +22,6 @@ public partial class TheOrangeRunGameManager : GameManager
 
     public IEnumerable<OrangeSpawner> OrangeSpawners { get; private set; }
 
-    /// <summary>
-    /// Called when the game is created (on both the server and client)
-    /// </summary>
     public TheOrangeRunGameManager()
     {
         if ( Game.IsClient )
@@ -49,7 +39,11 @@ public partial class TheOrangeRunGameManager : GameManager
 
         InitializeSoundScapes();
         InitializeOrangeSpawners();
-        StartGame();
+
+        Event.Run( _stateEventNames[_state].EntryEventName );
+        Event.Run( TheOrangeRunEvent.GameState.Changed, _state );
+
+        GameLoop();
     }
 
     private void InitializeSoundScapes()
@@ -442,10 +436,49 @@ public partial class TheOrangeRunGameManager : GameManager
         };
     }
 
-    internal void StartGame()
+
+    private GameState _state;
+    private readonly IReadOnlyDictionary<GameState, (string EntryEventName, string LeaveEventName)> _stateEventNames = new Dictionary<GameState, (string EntryEventName, string LeaveEventName)>
+    {
+        { GameState.Starting, (TheOrangeRunEvent.GameState.Starting.Entry, TheOrangeRunEvent.GameState.Starting.Leave) },
+        { GameState.Lobby, (TheOrangeRunEvent.GameState.Lobby.Entry, TheOrangeRunEvent.GameState.Lobby.Leave) },
+        { GameState.OrangeRun, (TheOrangeRunEvent.GameState.OrangeRun.Entry, TheOrangeRunEvent.GameState.OrangeRun.Leave) },
+        { GameState.Leaderboards, (TheOrangeRunEvent.GameState.Leaderboards.Entry, TheOrangeRunEvent.GameState.Leaderboards.Leave) }
+    };
+
+    public GameState State
+    {
+        get => _state;
+        private set
+        {
+            if ( value != _state )
+            {
+                Event.Run( _stateEventNames[_state].LeaveEventName );
+                _state = value;
+                Event.Run( _stateEventNames[_state].EntryEventName );
+
+                Event.Run( TheOrangeRunEvent.GameState.Changed, _state );
+            }
+        }
+    }
+
+    internal async void GameLoop()
     {
         foreach ( var orangeSpawner in OrangeSpawners )
             orangeSpawner.IsActive = true;
+
+        do
+        {
+            State = GameState.Lobby;
+            await GameTask.DelayRealtimeSeconds( 30 );
+
+            State = GameState.OrangeRun;
+            await GameTask.DelayRealtimeSeconds( 30 );
+
+            State = GameState.Leaderboards;
+            await GameTask.DelayRealtimeSeconds( 30 );
+
+        } while ( true );
     }
 
     [Net]
