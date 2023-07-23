@@ -1,6 +1,6 @@
 ﻿using Sandbox;
 
-namespace TheOrangeRun;
+namespace TheOrangeRun.Pawns;
 
 public class PawnAnimator : EntityComponent<Pawn>, ISingletonComponent
 {

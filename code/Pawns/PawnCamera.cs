@@ -1,8 +1,7 @@
 using Sandbox;
 using System;
-using System.Linq;
 
-namespace TheOrangeRun;
+namespace TheOrangeRun.Pawns;
 
 public partial class PawnCamera : EntityComponent<Pawn>, ISingletonComponent
 {
@@ -22,7 +21,7 @@ public partial class PawnCamera : EntityComponent<Pawn>, ISingletonComponent
 
     protected static Rotation LookAt( Vector3 targetPosition, Vector3 position )
     {
-        var targetDelta = (targetPosition - position);
+        var targetDelta = targetPosition - position;
         var direction = targetDelta.Normal;
 
         return Rotation.From( new Angles(

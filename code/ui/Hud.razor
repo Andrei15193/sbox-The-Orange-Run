@@ -3,6 +3,7 @@
 @using System.Linq;
 @using Sandbox;
 @using Sandbox.UI;
+@using TheOrangeRun.Pawns;
 @using TheOrangeRun.UI;
 
 @namespace TheOrangeRun.UI
@@ -29,7 +30,7 @@
             </tr>
             @foreach (var playerStats in Stats)
             {
-                <tr class="@(playerStats.IsCurrentUser ? "current" : "") @(playerStats.IsPreviousCurrentUser ? "after-current" : "")">
+                <tr class="@(playerStats.IsCurrentUser ? "current" : "") @(playerStats.IsAfterCurrentUser ? "after-current" : "")">
                     <td>@playerStats.DisplayName</td>
                     <td>@playerStats.CollectedOrangesCount</td>
                 </tr>
@@ -55,22 +56,25 @@
     private TheOrangeRunGameManager GameManager
         => (TheOrangeRunGameManager)TheOrangeRunGameManager.Current;
 
-    private IEnumerable<(string DisplayName, int CollectedOrangesCount, bool IsCurrentUser, bool IsPreviousCurrentUser)> Stats
+    private IEnumerable<(string DisplayName, int CollectedOrangesCount, bool IsCurrentUser, bool IsAfterCurrentUser)> Stats
     {
         get
         {
             var index = 0;
-            var isPreviousCurrent = false;
             return GameManager
-                .PlayerPawns.Concat(GameManager.PlayerPawns).Concat(GameManager.PlayerPawns).Concat(GameManager.PlayerPawns)
+                .PlayerPawns
                 .OrderByDescending(playerPawn => playerPawn.CollectedOrangesCount)
                 .ThenBy(playerPawn => playerPawn.Client.Name)
                 .Aggregate(
-                    new List<(string DisplayName, int CollectedOrangesCount, bool IsCurrentUser, bool IsPreviousCurrentUser)>(),
+                    new List<(string DisplayName, int CollectedOrangesCount, bool IsCurrentUser, bool IsAfterCurrentUser)>(),
                     (result, playerPawn) =>
                     {
-                        result.Add((playerPawn.Client.Name, playerPawn.CollectedOrangesCount, index == 2, isPreviousCurrent));
-                        isPreviousCurrent = result[result.Count - 1].IsCurrentUser;
+                        result.Add((
+                            DisplayName: playerPawn.Client.Name,
+                            CollectedOrangesCount: playerPawn.CollectedOrangesCount,
+                            IsCurrentUser: Game.LocalPawn == playerPawn,
+                            IsAfterCurrentUser: index > 0 && result[index - 1].IsCurrentUser)
+                        );
                         index++;
                         return result;
                     }

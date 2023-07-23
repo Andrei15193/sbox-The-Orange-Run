@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using TheOrangeRun.Oranges;
 
-namespace TheOrangeRun;
+namespace TheOrangeRun.Pawns;
 
 public partial class Pawn : AnimatedEntity
 {
@@ -31,6 +31,9 @@ public partial class Pawn : AnimatedEntity
 
     public int MaximumOrangeCarryCount
         => 10;
+
+    public int RespawnOrangeCount
+        => 0;
 
     [Net]
     public int CollectedOrangesCount { get; set; }
@@ -91,7 +94,10 @@ public partial class Pawn : AnimatedEntity
     [BindComponent]
     public PawnCamera Camera { get; }
 
-    public override Ray AimRay => new Ray( EyePosition, EyeRotation.Forward );
+    public override Ray AimRay
+        => new( EyePosition, EyeRotation.Forward );
+
+    public PawnSpawnPoint SpawnPoint { get; set; }
 
     /// <summary>
     /// Called when the entity is first created 
@@ -126,19 +132,34 @@ public partial class Pawn : AnimatedEntity
 
     public override void Simulate( IClient cl )
     {
-        SimulateRotation();
-        Controller?.Simulate( cl );
-        Animator?.Simulate();
-
-        if ( Game.IsServer && Input.Pressed( "attack1" ) )
+        if ( Position.z < -7000f )
         {
-            //Log.Info( "Add spawner" );
-            //new OrangeSpawner
-            //{
-            //    Position = Position,
-            //    DelayInSeconds = 1,
-            //    IsActive = true
-            //};
+            if ( Game.IsServer && CollectedOrangesCount >= RespawnOrangeCount )
+            {
+                if ( OrangeCarryCount > 0 )
+                    ChatBox.Say( $"{cl.Name} dropped the ball and lost all the oranges they were carrying." );
+
+                OrangeCarryCount = 0;
+                CollectedOrangesCount -= RespawnOrangeCount;
+                Position = SpawnPoint.Position;
+            }
+        }
+        else
+        {
+            SimulateRotation();
+            Controller?.Simulate( cl );
+            Animator?.Simulate();
+
+            if ( Game.IsServer && Input.Pressed( "attack1" ) )
+            {
+                Log.Info( "Add spawner" );
+                new OrangeSpawner
+                {
+                    Position = Position,
+                    DelayInSeconds = 1,
+                    IsActive = true
+                };
+            }
         }
     }
 
@@ -148,7 +169,7 @@ public partial class Pawn : AnimatedEntity
 
         switch ( other )
         {
-            case Orange _ when Game.IsServer && OrangeCarryCount < MaximumOrangeCarryCount :
+            case Orange _ when Game.IsServer && OrangeCarryCount < MaximumOrangeCarryCount:
                 OrangeCarryCount++;
                 other.Delete();
                 Sound.FromWorld( Sounds.Events.OrangeCollected, Position );
@@ -184,14 +205,13 @@ public partial class Pawn : AnimatedEntity
 
         if ( Input.Pressed( "attack1" ) )
         {
-            Sound.FromScreen( Sounds.Events.MessageSent );
-            //Log.Info( Position );
-            //_lastSpawnerPosition = Position;
+            Log.Info( Position );
+            _lastSpawnerPosition = Position;
         }
         if ( Input.Pressed( "attack2" ) && _lastSpawnerPosition.HasValue )
         {
-            //SpawnerPositions.Add( _lastSpawnerPosition.Value );
-            //_lastSpawnerPosition = null;
+            SpawnerPositions.Add( _lastSpawnerPosition.Value );
+            _lastSpawnerPosition = null;
         }
 
         if ( Input.Pressed( "use" ) )

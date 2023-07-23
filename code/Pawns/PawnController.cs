@@ -1,9 +1,8 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace TheOrangeRun;
+namespace TheOrangeRun.Pawns;
 
 public class PawnController : EntityComponent<Pawn>
 {
@@ -20,13 +19,7 @@ public class PawnController : EntityComponent<Pawn>
     {
         ControllerEvents.Clear();
 
-        if ( Entity.Position.z < -7000f )
-        {
-            Entity.Position = Sandbox.Entity.All.OfType<SpawnPoint>().First().Position;
-            return;
-        }
-
-            var movement = Entity.InputDirection.Normal;
+        var movement = Entity.InputDirection.Normal;
         var angles = Camera.Rotation.Angles().WithPitch( 0 );
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
@@ -101,7 +94,7 @@ public class PawnController : EntityComponent<Pawn>
 
         // Bleed off some speed, but if we have less than the bleed
         // threshold, bleed the threshold amount.
-        float control = (speed < StopSpeed) ? StopSpeed : speed;
+        float control = speed < StopSpeed ? StopSpeed : speed;
 
         // Add the amount to the drop amount.
         var drop = control * Time.Delta * frictionAmount;

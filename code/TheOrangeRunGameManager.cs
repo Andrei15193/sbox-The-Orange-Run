@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TheOrangeRun.Oranges;
+using TheOrangeRun.Pawns;
 using TheOrangeRun.UI;
 
 namespace TheOrangeRun;
@@ -23,6 +24,8 @@ public partial class TheOrangeRunGameManager : GameManager
             Game.RootPanel = new Hud();
     }
 
+    public IEnumerable<PawnSpawnPoint> SpawnPoints { get; private set; }
+
     [Net]
     public IList<Pawn> PlayerPawns { get; set; }
 
@@ -40,6 +43,7 @@ public partial class TheOrangeRunGameManager : GameManager
         Log.Info( nameof( TheOrangeRunGameManager ) + "." + nameof( MakeWorkd ) );
 
         InitializeSoundScapes();
+        InitializeSpawnPoints();
         InitializeOrangeSpawners();
         InitializeOrangeCollectors();
 
@@ -56,6 +60,77 @@ public partial class TheOrangeRunGameManager : GameManager
             Soundscape = Sounds.Soundscapes.Ambiance,
             Position = new Vector3( 985f, 2220f, 0f ),
             Radius = 230
+        };
+    }
+
+    private void InitializeSpawnPoints()
+    {
+        SpawnPoints = new[]
+        {
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 1120.9475f, 2706.1333f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 1124.2898f, 2506.3325f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 971.0964f, 2494.413f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 1037.3136f, 2612.2134f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 951.96136f, 2688.0115f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 837.3842f, 2614.965f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 887.5841f, 2453.0503f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 745.8751f, 2431.1465f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 701.36774f, 2553.2644f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 791.76154f, 2686.722f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 669.2805f, 2689.2905f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 569.73706f, 2581.7915f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 598.16296f, 2471.4714f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 938.5091f, 2588.3008f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 825.6168f, 2514.893f, 0 )
+            },
+            new PawnSpawnPoint
+            {
+                Position = new Vector3( 566.36945f, 2686.0105f, 0 )
+            }
         };
     }
 
@@ -509,37 +584,41 @@ public partial class TheOrangeRunGameManager : GameManager
     {
         base.ClientJoined( client );
 
-        ChatBox.Say( client.Name + " has joined the game..." );
+        var spawnPoint = SpawnPoints
+            .Where( spawnPoint => spawnPoint.Pawn is null )
+            .OrderBy( _ => Guid.NewGuid() )
+            .First();
 
-        // Create a pawn for this client to play with
-
-        var pawn = new Pawn();
+        var pawn = new Pawn
+        {
+            SpawnPoint = spawnPoint
+        };
+        spawnPoint.Pawn = pawn;
         client.Pawn = pawn;
         pawn.Respawn();
         pawn.DressFromClient( client );
 
-        // Get all of the spawnpoints
-        var spawnpoints = All.OfType<SpawnPoint>();
-
-        // chose a random one
-        var randomSpawnPoint = spawnpoints.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
-
-        // if it exists, place the pawn there
-        if ( randomSpawnPoint != null )
-        {
-            var tx = randomSpawnPoint.Transform;
-            tx.Position = tx.Position + Vector3.Up * 50.0f; // raise it up
-            pawn.Transform = tx;
-        }
-
         PlayerPawns.Add( pawn );
+
+        ChatBox.Say( client.Name + " has joined the game..." );
+
+        pawn.Position = pawn.SpawnPoint.Position;
     }
 
     public override void ClientDisconnect( IClient client, NetworkDisconnectionReason reason )
     {
-        base.ClientDisconnect( client, reason );
+        if ( client.Pawn is Pawn pawn )
+        {
+            PlayerPawns.Remove(pawn);
+            foreach ( var spawnPoint in SpawnPoints )
+                if ( spawnPoint.Pawn == pawn )
+                {
+                    spawnPoint.Pawn = null;
+                    pawn.SpawnPoint = null;
+                }
+        }
 
-        PlayerPawns.Remove( client.Pawn as Pawn );
+        base.ClientDisconnect( client, reason );
     }
 
     [Event.Hotload]
