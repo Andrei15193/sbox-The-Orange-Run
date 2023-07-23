@@ -5,13 +5,13 @@ namespace TheOrangeRun.Oranges
     [Category("Spawners")]
     public class OrangeSpawner : Entity
     {
-        private bool _isActive = false;
+        private bool _hasValidOrange = false;
 
         public float LastSpawnTimeInSeconds { get; private set; }
 
         public float LastCollectTimeInSeconds { get; private set; }
 
-        public float DelayInSeconds { get; set; }
+        public float DelayInSeconds { get; set; } = 5 * 60;
 
         public Orange Orange { get; private set; }
 
@@ -22,30 +22,13 @@ namespace TheOrangeRun.Oranges
 
             Orange = new Orange
             {
-                BasePosition = Position + Vector3.Up * 20
+                BasePosition = Position + Vector3.Up * 20,
             };
-            Orange.Collected += delegate { LastCollectTimeInSeconds = Time.Now; };
+            _hasValidOrange = true;
             LastSpawnTimeInSeconds = Time.Now;
         }
 
-        public bool IsActive
-        {
-            get
-            {
-                return _isActive;
-            }
-            set
-            {
-                if ( value != _isActive )
-                {
-                    _isActive = value;
-                    if ( _isActive )
-                        Event.Register( this );
-                    else
-                        Event.Unregister( this );
-                }
-            }
-        }
+        public bool IsActive { get; set; }
 
         protected override void OnDestroy()
         {
@@ -56,7 +39,12 @@ namespace TheOrangeRun.Oranges
         [GameEvent.Tick.Server]
         internal void OnServerTick()
         {
-            if ( Orange is null || (!Orange.IsValid && LastCollectTimeInSeconds + DelayInSeconds < Time.Now ))
+            if ( (Orange is null || !Orange.IsValid) && _hasValidOrange )
+            {
+                _hasValidOrange = false;
+                LastCollectTimeInSeconds = Time.Now;
+            }
+            if ( IsValid && (Orange is null || (!Orange.IsValid && LastCollectTimeInSeconds + DelayInSeconds < Time.Now )))
                 SpawnOrange();
         }
     }

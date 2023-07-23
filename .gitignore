@@ -19,3 +19,7 @@ code/Properties/*
 
 # Office lock files
 *.~vsdx
+
+# Original Sound files
+*.mp3
+*.wav

@@ -17,16 +17,18 @@ public partial class TheOrangeRunGameManager : GameManager
         protected set => GameManager.Current = value;
     }
 
-    public static Hud RootPanel
-        => (Hud)Game.RootPanel;
-
-    public IEnumerable<OrangeSpawner> OrangeSpawners { get; private set; }
-
     public TheOrangeRunGameManager()
     {
         if ( Game.IsClient )
             Game.RootPanel = new Hud();
     }
+
+    [Net]
+    public IList<Pawn> PlayerPawns { get; set; }
+
+    public IEnumerable<OrangeSpawner> OrangeSpawners { get; private set; }
+
+    public IEnumerable<OrangeCollector> OrangeCollectors { get; private set; }
 
     public const float DefaultSpawnDelay = 1;
 
@@ -39,6 +41,7 @@ public partial class TheOrangeRunGameManager : GameManager
 
         InitializeSoundScapes();
         InitializeOrangeSpawners();
+        InitializeOrangeCollectors();
 
         Event.Run( _stateEventNames[_state].EntryEventName );
         Event.Run( TheOrangeRunEvent.GameState.Changed, _state );
@@ -50,7 +53,7 @@ public partial class TheOrangeRunGameManager : GameManager
     {
         AmbianceSoundscape = new SoundscapeRadiusEntity
         {
-            Soundscape = "assets/sounds/mixkit/ambiance.sndscape",
+            Soundscape = Sounds.Soundscapes.Ambiance,
             Position = new Vector3( 985f, 2220f, 0f ),
             Radius = 230
         };
@@ -436,6 +439,27 @@ public partial class TheOrangeRunGameManager : GameManager
         };
     }
 
+    private void InitializeOrangeCollectors()
+    {
+        OrangeCollectors = new[]
+        {
+            new OrangeCollector
+            {
+                Position = new Vector3( 622.17236f, 585.5672f, 0 ),
+                Rotation = new Rotation(Vector3.Up, (float)Math.PI / 3)
+            },
+            new OrangeCollector
+            {
+                Position = new Vector3( 879.7922f, 735.0467f, 0 ),
+                Rotation = new Rotation(Vector3.Up, (float)Math.PI / 7)
+            },
+            new OrangeCollector
+            {
+                Position = new Vector3( 759.40985f, 443.0306f, 0 ),
+                Rotation = new Rotation(Vector3.Up, (float)Math.PI / 13)
+            }
+        };
+    }
 
     private GameState _state;
     private readonly IReadOnlyDictionary<GameState, (string EntryEventName, string LeaveEventName)> _stateEventNames = new Dictionary<GameState, (string EntryEventName, string LeaveEventName)>
@@ -481,33 +505,14 @@ public partial class TheOrangeRunGameManager : GameManager
         } while ( true );
     }
 
-    [Net]
-    public IList<PawnStats> PawnsStats { get; private set; }
-
-    public void CollectOrange( Orange orange, Pawn pawn )
-    {
-        if ( Game.IsServer && orange.IsValid && pawn.IsValid )
-        {
-            var pawnStats = PawnsStats.FirstOrDefault( pawnStats => pawnStats.Id == pawn.Client.Id );
-            if ( pawnStats is not null )
-            {
-                pawnStats.TotalOranges++;
-                orange.Delete();
-            }
-        }
-    }
-
-    /// <summary>
-    /// A client has joined the server. Make them a pawn to play with
-    /// </summary>
     public override void ClientJoined( IClient client )
     {
         base.ClientJoined( client );
-        PawnsStats.Add( new PawnStats { Id = client.Id, Name = client.Name, TotalOranges = 0 } );
 
         ChatBox.Say( client.Name + " has joined the game..." );
 
         // Create a pawn for this client to play with
+
         var pawn = new Pawn();
         client.Pawn = pawn;
         pawn.Respawn();
@@ -526,18 +531,34 @@ public partial class TheOrangeRunGameManager : GameManager
             tx.Position = tx.Position + Vector3.Up * 50.0f; // raise it up
             pawn.Transform = tx;
         }
+
+        PlayerPawns.Add( pawn );
     }
 
     public override void ClientDisconnect( IClient client, NetworkDisconnectionReason reason )
     {
         base.ClientDisconnect( client, reason );
 
-        var statsIndex = 0;
-        using ( var pawnStats = PawnsStats.GetEnumerator() )
-            while ( pawnStats.MoveNext() && pawnStats.Current.Id != client.Id )
-                statsIndex++;
+        PlayerPawns.Remove( client.Pawn as Pawn );
+    }
 
-        if ( statsIndex < PawnsStats.Count )
-            PawnsStats.RemoveAt( statsIndex );
+    [Event.Hotload]
+    public void OnHotReload()
+    {
+        Log.Info( "Hot reload" );
+        if ( Game.IsServer )
+        {
+            foreach ( var orangeSpawner in All.OfType<OrangeSpawner>().Except( OrangeSpawners ).ToList() )
+                orangeSpawner.Delete();
+            foreach ( var orange in All.OfType<Orange>().Except( OrangeSpawners.Select( orangeSpawner => orangeSpawner.Orange ) ).ToList() )
+                orange.Delete();
+
+            var moreOrangeSpawners = new OrangeSpawner[]
+            {
+            };
+
+            foreach ( var orangeSpanwer in moreOrangeSpawners )
+                orangeSpanwer.IsActive = true;
+        }
     }
 }

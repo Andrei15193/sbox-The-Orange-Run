@@ -30,3 +30,7 @@ allowed to claim them as your own or register them on any rights management serv
 Used items from MixKit - https://mixkit.co
 
 * Sub urban ambience and birds - https://assets.mixkit.co/active_storage/sfx/371/371.wav
+* Correct answer tone - https://assets.mixkit.co/active_storage/sfx/2870/2870.wav
+* Dry pop up notification alert - https://assets.mixkit.co/active_storage/sfx/2356/2356.wav
+* Cooking stopwatch alert - https://assets.mixkit.co/active_storage/sfx/1792/1792.wav
+* Message pop alert - https://assets.mixkit.co/active_storage/sfx/2354/2354.mp3

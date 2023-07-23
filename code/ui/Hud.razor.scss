@@ -47,21 +47,11 @@ Hud {
         position: absolute;
         top: 50px;
         left: 50px;
-        padding: 8px;
         background-color: orange;
         color: white;
         font-weight: 600;
 
         tr {
-            margin-top: 6px;
-            border-top: 1px solid white;
-            padding-top: 6px;
-
-            &:first-child {
-                margin-top: 0;
-                border-top: 0;
-            }
-
             td, th {
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -69,25 +59,52 @@ Hud {
             }
 
             th {
+                padding: 12px 0;
                 font-size: 54px;
-                margin-bottom: 10px;
             }
 
             td {
+                padding: 4px 0;
                 font-size: 30px;
             }
             // Player name
             :nth-child(1) {
+                margin-left: 8px;
                 width: 500px;
             }
             // Oranges
             :nth-child(2) {
+                margin-right: 8px;
                 width: 200px;
 
                 label {
                     text-align: right;
                 }
             }
+
+            td {
+                border-top: 1px solid white;
+            }
+
+            &.current {
+                border-top: 0;
+                color: orange;
+                background-color: white;
+            }
+
+            &.after-current td {
+                border-top: 0;
+            }
         }
+    }
+
+    .orange-bag {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        font-size: 70px;
+        font-family: Roboto;
+        color: white;
+        text-stroke: 10px black;
     }
 }

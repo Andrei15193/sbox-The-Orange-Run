@@ -3,6 +3,8 @@ The Orange Run
 
 A small platformer-like game where you have to collect oranges. The player with most oranges collected at the end of the game wins.
 
+To get sound assets go the respective directory (e.g.: `assets/sounds/mixkit`) and run `Get-Sounds.ps1` with PowerShell.
+
 MVP
 ---
 

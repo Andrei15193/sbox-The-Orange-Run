@@ -1,10 +1,40 @@
 ﻿using Sandbox;
+using Sandbox.UI;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using TheOrangeRun.Oranges;
 
 namespace TheOrangeRun;
 
 public partial class Pawn : AnimatedEntity
 {
+    private static readonly IReadOnlyDictionary<int, string> _dropMessageFragments = new Dictionary<int, string>
+    {
+        { 1, "an orange" },
+        { 2, "two oranges" },
+        { 3, "three oranges" },
+        { 4, "four oranges" },
+        { 5, "five oranges" },
+        { 6, "half a dozen oranges" },
+        { 7, "seven oranges" },
+        { 8, "eight oranges" },
+        { 9, "nine oranges" },
+        { 10, "a full bag of oranges" }
+    };
+
+    public bool IsScoreScreenVisible { get; set; }
+
+    [Net]
+    public int OrangeCarryCount { get; set; }
+
+    public int MaximumOrangeCarryCount
+        => 10;
+
+    [Net]
+    public int CollectedOrangesCount { get; set; }
+
     [ClientInput]
     public Vector3 InputDirection { get; set; }
 
@@ -68,10 +98,13 @@ public partial class Pawn : AnimatedEntity
     /// </summary>
     public override void Spawn()
     {
-        SetModel( "models/citizen/citizen.vmdl" );
-        SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+        base.Spawn();
         Tags.Add( "player" );
 
+        SetModel( "models/citizen/citizen.vmdl" );
+        SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+
+        EnableTouch = true;
         EnableDrawing = true;
         EnableHideInFirstPerson = true;
         EnableShadowInFirstPerson = true;
@@ -96,6 +129,48 @@ public partial class Pawn : AnimatedEntity
         SimulateRotation();
         Controller?.Simulate( cl );
         Animator?.Simulate();
+
+        if ( Game.IsServer && Input.Pressed( "attack1" ) )
+        {
+            //Log.Info( "Add spawner" );
+            //new OrangeSpawner
+            //{
+            //    Position = Position,
+            //    DelayInSeconds = 1,
+            //    IsActive = true
+            //};
+        }
+    }
+
+    public override void Touch( Entity other )
+    {
+        base.Touch( other );
+
+        switch ( other )
+        {
+            case Orange _ when Game.IsServer && OrangeCarryCount < MaximumOrangeCarryCount :
+                OrangeCarryCount++;
+                other.Delete();
+                Sound.FromWorld( Sounds.Events.OrangeCollected, Position );
+                break;
+
+            case OrangeCollector _ when Game.IsServer && OrangeCarryCount > 0:
+                CollectedOrangesCount += OrangeCarryCount;
+                ChatBox.Say( $"{Client.Name} has dropped {_dropMessageFragments[OrangeCarryCount]}!" );
+                Sound.FromScreen( Sounds.Events.MessageSent );
+                OrangeCarryCount = 0;
+                break;
+        }
+    }
+
+    public static ICollection<Vector3> SpawnerPositions = new List<Vector3>();
+    private Vector3? _lastSpawnerPosition = null;
+
+    [Event.Hotload]
+    public void OnHotReload()
+    {
+        SpawnerPositions.Clear();
+        _lastSpawnerPosition = null;
     }
 
     public override void BuildInput()
@@ -103,9 +178,51 @@ public partial class Pawn : AnimatedEntity
         Camera?.BuildInput();
 
         if ( Input.Pressed( "scoreScreen" ) )
-            TheOrangeRunGameManager.RootPanel.IsScoreScreenVisible = true;
+            IsScoreScreenVisible = true;
         if ( Input.Released( "scoreScreen" ) )
-            TheOrangeRunGameManager.RootPanel.IsScoreScreenVisible = false;
+            IsScoreScreenVisible = false;
+
+        if ( Input.Pressed( "attack1" ) )
+        {
+            Sound.FromScreen( Sounds.Events.MessageSent );
+            //Log.Info( Position );
+            //_lastSpawnerPosition = Position;
+        }
+        if ( Input.Pressed( "attack2" ) && _lastSpawnerPosition.HasValue )
+        {
+            //SpawnerPositions.Add( _lastSpawnerPosition.Value );
+            //_lastSpawnerPosition = null;
+        }
+
+        if ( Input.Pressed( "use" ) )
+        {
+            Log.Info( FileSystem.Data.GetFullPath( "spawners.txt" ) );
+
+            FileSystem.Data.WriteAllText(
+                "spawners.txt",
+                SpawnerPositions
+                    .Aggregate(
+                        new StringBuilder(),
+                        ( result, spawnerPosition ) => result
+                            .AppendLine( "new OrangeSpawner" )
+                            .AppendLine( "{" )
+                            .AppendLine( $"    Position = new Vector3( {spawnerPosition.x}f, {spawnerPosition.y}f, {spawnerPosition.z}f )," )
+                            .AppendLine( "    DelayInSeconds = DefaultSpawnDelay" )
+                            .AppendLine( "}," )
+                    )
+                    .ToString()
+            );
+        }
+
+        if ( Input.Pressed( "reload" ) )
+        {
+            var start = new Vector3( 542.1441f, 1827.9827f, 0.0052121878f );
+            var end = new Vector3( 1437.997f, 1829.9656f, 0.0052121878f );
+            var diff = end - start;
+            var segmentsCount = 4;
+            for ( var segment = 1; segment < segmentsCount; segment++ )
+                Log.Info( start + segment * diff / segmentsCount );
+        }
     }
 
     public override void FrameSimulate( IClient cl )
