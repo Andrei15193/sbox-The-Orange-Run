@@ -1,0 +1,64 @@
+@using Sandbox;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Threading.Tasks;
+@using Sandbox.Menu;
+@using Sandbox.Services;
+@using Sandbox.UI;
+
+<root>
+    <label class="game-title">
+        @Game.Menu.Package.Title
+    </label>
+
+    <div class="controls">
+        <div class="span">
+            <label>Showing @Servers.Count() @(Servers.Count() == 1 ? "game" : "games")</label>
+            <i class="with-click" tooltip="Refresh lobbies" @onclick=@RefreshServers>refresh</i>
+        </div>
+
+        <div class="scroll">
+            @foreach (var server in Servers)
+            {
+                <a class="button" @onclick=@( () => Join( server ) )>@server.Name (@server.Players/@server.MaxPlayers)</a>
+            }
+        </div>
+
+        <div class="spacer" />
+
+        <a class="button" @onclick=@CreateGameAsync>Create Game</a>
+        <a class="button" onclick=@Game.Menu.Close>Quit</a>
+    </div>
+</root>
+
+@code
+{
+    private readonly ServerList _serverList = new ServerList();
+
+    public IEnumerable<ServerList.Entry> Servers
+        => _serverList
+            .Where(server => server.Game == Game.Menu.Package.FullIdent);
+
+    public void RefreshServers()
+        => _serverList.Query();
+
+    public async void CreateGameAsync()
+    {
+        this.Navigate("/current");
+        await Game.Menu.StartServerAsync(Game.Menu.Package.GetMeta<int>("MaxPlayers", 1), $"{Game.UserName}'s Orange Run", "facepunch.square");
+    }
+
+    public async void Join(ServerList.Entry server)
+    {
+        this.Navigate("/current");
+        Game.Menu.ConnectToServer(server.SteamId);
+    }
+
+    protected override int BuildHash()
+    => Servers
+        .Aggregate(
+            0,
+            (hashCode, server) => HashCode.Combine(hashCode, server.SteamId)
+        );
+}

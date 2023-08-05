@@ -8,7 +8,7 @@
   "HasAssets": true,
   "AssetsPath": "",
   "Resources": "",
-  "MenuResources": null,
+  "MenuResources": "ui/*",
   "HasCode": true,
   "CodePath": "/code/",
   "PackageReferences": [],
@@ -97,7 +97,6 @@
       "RootNamespace": "TheOrangeRun",
       "DefineConstants": "SANDBOX;ADDON;DEBUG",
       "NoWarn": "1701;1702;1591;",
-      "ReleaseMode": "Release",
       "References": [],
       "DistinctReferences": []
     },
