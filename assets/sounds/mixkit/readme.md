@@ -34,3 +34,5 @@ Used items from MixKit - https://mixkit.co
 * Dry pop up notification alert - https://assets.mixkit.co/active_storage/sfx/2356/2356.wav
 * Cooking stopwatch alert - https://assets.mixkit.co/active_storage/sfx/1792/1792.wav
 * Message pop alert - https://assets.mixkit.co/active_storage/sfx/2354/2354.mp3
+* Police short whistle - https://assets.mixkit.co/active_storage/sfx/615/615.wav
+* Police whistle - https://assets.mixkit.co/active_storage/sfx/614/614.wav

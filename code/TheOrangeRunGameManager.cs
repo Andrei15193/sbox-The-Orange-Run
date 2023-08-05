@@ -574,6 +574,7 @@ public partial class TheOrangeRunGameManager : GameManager
             ChatBox.Say( "The game is going to start any time now..." );
             await GameTask.DelayRealtimeSeconds( Random.Shared.Int(3, 5) );
 
+            Sound.FromScreen( Sounds.Events.TheOrangeRunStarted );
             State = GameState.OrangeRun;
             ChatBox.Say( "Grab those oranges!" );
             await GameTask.DelayRealtimeSeconds( 60 );
@@ -590,8 +591,10 @@ public partial class TheOrangeRunGameManager : GameManager
             await GameTask.DelayRealtimeSeconds( 1 );
 
             State = GameState.Leaderboards;
+            Sound.FromScreen( Sounds.Events.TheOrangeRunEnded );
             var winner = PlayerPawns
                 .OrderByDescending( pawn => pawn.CollectedOrangesCount )
+                .ThenBy( _ => Guid.NewGuid() )
                 .Select( pawn => $"{pawn.Client.Name}!" )
                 .DefaultIfEmpty( "there's nobody here!" )
                 .First();
