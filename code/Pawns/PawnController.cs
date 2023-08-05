@@ -6,6 +6,8 @@ namespace TheOrangeRun.Pawns;
 
 public class PawnController : EntityComponent<Pawn>
 {
+    private bool _canMove = false;
+
     public int StepSize => 24;
     public int GroundAngle => 45;
     public int JumpSpeed => 410;
@@ -24,26 +26,30 @@ public class PawnController : EntityComponent<Pawn>
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
 
-        if ( groundEntity.IsValid() )
+        if ( _canMove )
         {
-            if ( !Grounded )
+            if ( groundEntity.IsValid() )
             {
-                Entity.Velocity = Entity.Velocity.WithZ( 0 );
-                AddEvent( "grounded" );
+                if ( !Grounded )
+                {
+                    Entity.Velocity = Entity.Velocity.WithZ( 0 );
+                    AddEvent( "grounded" );
+                }
+
+                var carryModifier = 1f - 0.21f / Entity.MaximumOrangeCarryCount * Entity.OrangeCarryCount;
+                Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, carryModifier * 200.0f * (Input.Down( "run" ) ? 2.5f : 1f), 7.5f );
+                Entity.Velocity = ApplyFriction( Entity.Velocity, 4.0f );
+            }
+            else
+            {
+                Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 15, 20f );
+                Entity.Velocity += Vector3.Down * Gravity * Time.Delta;
             }
 
-            Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 200.0f * (Input.Down( "run" ) ? 2.5f : 1f), 7.5f );
-            Entity.Velocity = ApplyFriction( Entity.Velocity, 4.0f );
-        }
-        else
-        {
-            Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 15, 20f );
-            Entity.Velocity += Vector3.Down * Gravity * Time.Delta;
-        }
-
-        if ( Input.Pressed( "jump" ) )
-        {
-            DoJump();
+            if ( Input.Pressed( "jump" ) )
+            {
+                DoJump();
+            }
         }
 
         var mh = new MoveHelper( Entity.Position, Entity.Velocity );
@@ -61,6 +67,18 @@ public class PawnController : EntityComponent<Pawn>
         }
 
         Entity.GroundEntity = groundEntity;
+    }
+
+    [TheOrangeRunEvent.GameState.OrangeRun.Entry]
+    protected void OnEnterOrangeRunState()
+    {
+        _canMove = true;
+    }
+
+    [TheOrangeRunEvent.GameState.OrangeRun.Leave]
+    protected void OnLeaveOrangeRunState()
+    {
+        _canMove = false;
     }
 
     void DoJump()
@@ -137,12 +155,14 @@ public class PawnController : EntityComponent<Pawn>
     {
         AddEvent( jumpType );
 
-        return input + Vector3.Up * JumpSpeed;
+        var carryModifier = 1f - 0.16f / Entity.MaximumOrangeCarryCount * Entity.OrangeCarryCount;
+        return input + Vector3.Up * JumpSpeed * carryModifier;
     }
 
     Vector3 StayOnGround( Vector3 position )
     {
-        var start = position + Vector3.Up * 2;
+        var carryModifier = 1f - 0.5f / Entity.MaximumOrangeCarryCount * Entity.OrangeCarryCount;
+        var start = position + Vector3.Up * 2 * carryModifier;
         var end = position + Vector3.Down * StepSize;
 
         // See how far up we can go without getting stuck

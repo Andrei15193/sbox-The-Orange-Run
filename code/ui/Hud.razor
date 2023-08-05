@@ -21,7 +21,7 @@
         <label class="subtitle">Collect oranges and drop them at the boxes near spawn.</label>
     </div>
 
-    @if (Pawn.IsScoreScreenVisible)
+    @if (Pawn.IsScoreScreenVisible || TheOrangeRunGameManager.Current.State == GameState.Leaderboards)
     {
         <table class="users-list">
             <tr>
@@ -86,6 +86,7 @@
         => HashCode.Combine(
             Pawn.IsScoreScreenVisible,
             Pawn.OrangeCarryCount,
+            TheOrangeRunGameManager.Current.State,
             GameManager.PlayerPawns.Aggregate(
                 0,
                 (hash, playerPawn) => HashCode.Combine(hash, playerPawn.CollectedOrangesCount)

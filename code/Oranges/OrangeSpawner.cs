@@ -47,5 +47,9 @@ namespace TheOrangeRun.Oranges
             if ( IsValid && (Orange is null || (!Orange.IsValid && LastCollectTimeInSeconds + DelayInSeconds < Time.Now )))
                 SpawnOrange();
         }
+
+        [TheOrangeRunEvent.GameState.Lobby.Entry]
+        public void OnLobbyEntry()
+            => SpawnOrange();
     }
 }

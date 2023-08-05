@@ -24,6 +24,8 @@ public partial class Pawn : AnimatedEntity
         { 10, "a full bag of oranges" }
     };
 
+    private bool _fallsEndlessly = false;
+
     public bool IsScoreScreenVisible { get; set; }
 
     [Net]
@@ -33,7 +35,7 @@ public partial class Pawn : AnimatedEntity
         => 10;
 
     public int RespawnOrangeCount
-        => 0;
+        => 3;
 
     [Net]
     public int CollectedOrangesCount { get; set; }
@@ -134,22 +136,30 @@ public partial class Pawn : AnimatedEntity
     {
         if ( Position.z < -7000f )
         {
-            if ( Game.IsServer && CollectedOrangesCount >= RespawnOrangeCount )
-            {
-                if ( OrangeCarryCount > 0 )
-                    ChatBox.Say( $"{cl.Name} dropped the ball and lost all the oranges they were carrying." );
+            if ( Game.IsServer && !_fallsEndlessly )
+                if ( CollectedOrangesCount >= RespawnOrangeCount )
+                {
+                    if ( OrangeCarryCount > 0 )
+                        ChatBox.Say( $"{cl.Name} dropped the ball and lost all the oranges they were carrying." );
 
-                OrangeCarryCount = 0;
-                CollectedOrangesCount -= RespawnOrangeCount;
-                Position = SpawnPoint.Position;
-            }
+                    OrangeCarryCount = 0;
+                    CollectedOrangesCount -= RespawnOrangeCount;
+                    Position = SpawnPoint.Position;
+                }
+                else
+                {
+                    _fallsEndlessly = true;
+                    ChatBox.Say( $"{cl.Name} didn't drop any oranges before doing something daring and now falls for eternity." );
+                }
         }
         else
         {
             SimulateRotation();
-            Controller?.Simulate( cl );
+            if ( !_fallsEndlessly )
+                Controller?.Simulate( cl );
             Animator?.Simulate();
 
+#if DEBUG
             if ( Game.IsServer && Input.Pressed( "attack1" ) )
             {
                 Log.Info( "Add spawner" );
@@ -160,6 +170,7 @@ public partial class Pawn : AnimatedEntity
                     IsActive = true
                 };
             }
+#endif
         }
     }
 
@@ -167,23 +178,25 @@ public partial class Pawn : AnimatedEntity
     {
         base.Touch( other );
 
-        switch ( other )
-        {
-            case Orange _ when Game.IsServer && OrangeCarryCount < MaximumOrangeCarryCount:
-                OrangeCarryCount++;
-                other.Delete();
-                Sound.FromWorld( Sounds.Events.OrangeCollected, Position );
-                break;
+        if ( TheOrangeRunGameManager.Current.State == GameState.OrangeRun )
+            switch ( other )
+            {
+                case Orange _ when Game.IsServer && OrangeCarryCount < MaximumOrangeCarryCount:
+                    OrangeCarryCount++;
+                    other.Delete();
+                    Sound.FromWorld( Sounds.Events.OrangeCollected, Position );
+                    break;
 
-            case OrangeCollector _ when Game.IsServer && OrangeCarryCount > 0:
-                CollectedOrangesCount += OrangeCarryCount;
-                ChatBox.Say( $"{Client.Name} has dropped {_dropMessageFragments[OrangeCarryCount]}!" );
-                Sound.FromScreen( Sounds.Events.MessageSent );
-                OrangeCarryCount = 0;
-                break;
-        }
+                case OrangeCollector _ when Game.IsServer && OrangeCarryCount > 0:
+                    CollectedOrangesCount += OrangeCarryCount;
+                    ChatBox.Say( $"{Client.Name} has dropped {_dropMessageFragments[OrangeCarryCount]}!" );
+                    Sound.FromScreen( Sounds.Events.MessageSent );
+                    OrangeCarryCount = 0;
+                    break;
+            }
     }
 
+#if DEBUG
     public static ICollection<Vector3> SpawnerPositions = new List<Vector3>();
     private Vector3? _lastSpawnerPosition = null;
 
@@ -193,6 +206,7 @@ public partial class Pawn : AnimatedEntity
         SpawnerPositions.Clear();
         _lastSpawnerPosition = null;
     }
+#endif
 
     public override void BuildInput()
     {
@@ -203,6 +217,7 @@ public partial class Pawn : AnimatedEntity
         if ( Input.Released( "scoreScreen" ) )
             IsScoreScreenVisible = false;
 
+#if DEBUG
         if ( Input.Pressed( "attack1" ) )
         {
             Log.Info( Position );
@@ -243,12 +258,23 @@ public partial class Pawn : AnimatedEntity
             for ( var segment = 1; segment < segmentsCount; segment++ )
                 Log.Info( start + segment * diff / segmentsCount );
         }
+#endif
     }
 
     public override void FrameSimulate( IClient cl )
     {
         SimulateRotation();
         Camera?.Update();
+    }
+
+    [TheOrangeRunEvent.GameState.Lobby.Entry]
+    protected void OnEnterLobby()
+    {
+        _fallsEndlessly = false;
+        Velocity = 0;
+        OrangeCarryCount = 0;
+        CollectedOrangesCount = 0;
+        Position = SpawnPoint.Position;
     }
 
     public TraceResult TraceBBox( Vector3 start, Vector3 end, float liftFeet = 0.0f )
