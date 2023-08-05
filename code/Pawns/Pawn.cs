@@ -212,9 +212,9 @@ public partial class Pawn : AnimatedEntity
     {
         Camera?.BuildInput();
 
-        if ( Input.Pressed( "scoreScreen" ) )
+        if ( Input.Pressed( "score" ) )
             IsScoreScreenVisible = true;
-        if ( Input.Released( "scoreScreen" ) )
+        if ( Input.Released( "score" ) )
             IsScoreScreenVisible = false;
 
 #if DEBUG

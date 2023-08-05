@@ -36,8 +36,8 @@ public class PawnController : EntityComponent<Pawn>
                     AddEvent( "grounded" );
                 }
 
-                var carryModifier = 1f - 0.21f / Entity.MaximumOrangeCarryCount * Entity.OrangeCarryCount;
-                Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, carryModifier * 200.0f * (Input.Down( "run" ) ? 2.5f : 1f), 7.5f );
+                var carryModifier = 1f - 0.5f / Entity.MaximumOrangeCarryCount * Entity.OrangeCarryCount;
+                Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, carryModifier * 400.0f, 7.5f );
                 Entity.Velocity = ApplyFriction( Entity.Velocity, 4.0f );
             }
             else
