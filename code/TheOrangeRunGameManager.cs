@@ -573,7 +573,7 @@ public partial class TheOrangeRunGameManager : GameManager
             ChatBox.Say( "We are now in the lobby, waiting... for the game to start..." );
             await GameTask.DelayRealtimeSeconds( 7 );
             ChatBox.Say( "The game is going to start any time now..." );
-            await GameTask.DelayRealtimeSeconds( Random.Shared.Int(3, 5) );
+            await GameTask.DelayRealtimeSeconds( Random.Shared.Int( 3, 5 ) );
 
             Sound.FromScreen( Sounds.Events.TheOrangeRunStarted );
             State = GameState.OrangeRun;
@@ -618,14 +618,17 @@ public partial class TheOrangeRunGameManager : GameManager
         {
             SpawnPoint = spawnPoint
         };
-        spawnPoint.Pawn = pawn;
         client.Pawn = pawn;
+        spawnPoint.Pawn = pawn;
         pawn.Respawn();
         pawn.DressFromClient( client );
 
         PlayerPawns.Add( pawn );
 
-        ChatBox.Say( client.Name + " has joined the game..." );
+        if ( State == GameState.Lobby )
+            ChatBox.Say( client.Name + " has joined the game..." );
+        else
+            ChatBox.Say( client.Name + " has joined the game while it is in progress, it will take a bit to complete" );
 
         pawn.Position = pawn.SpawnPoint.Position;
     }
@@ -634,7 +637,7 @@ public partial class TheOrangeRunGameManager : GameManager
     {
         if ( client.Pawn is Pawn pawn )
         {
-            PlayerPawns.Remove(pawn);
+            PlayerPawns.Remove( pawn );
             foreach ( var spawnPoint in SpawnPoints )
                 if ( spawnPoint.Pawn == pawn )
                 {

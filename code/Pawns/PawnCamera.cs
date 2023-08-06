@@ -74,13 +74,6 @@ public partial class PawnCamera : EntityComponent<Pawn>, ISingletonComponent
 
             Entity.ViewAngles = OrbitAngles.WithPitch( 0f );
         }
-        else
-        {
-            var direction = Screen.GetDirection( Mouse.Position, Camera.FieldOfView, Camera.Rotation, Screen.Size );
-            var hitPos = IntersectPlane( Camera.Position, direction, Entity.EyePosition.z );
-
-            Entity.ViewAngles = (hitPos - Entity.EyePosition).EulerAngles;
-        }
 
         OrbitAngles.pitch = OrbitAngles.pitch.Clamp( PitchClamp.x, PitchClamp.y );
 

@@ -17,12 +17,25 @@ public class PawnController : EntityComponent<Pawn>
 
     bool Grounded => Entity.GroundEntity.IsValid();
 
+    [TheOrangeRunEvent.GameState.OrangeRun.Entry]
+    protected void OnEnterOrangeRunState()
+    {
+        _canMove = true;
+    }
+
+    [TheOrangeRunEvent.GameState.OrangeRun.Leave]
+    protected void OnLeaveOrangeRunState()
+    {
+        _canMove = false;
+    }
+
     public void Simulate( IClient client )
     {
         ControllerEvents.Clear();
 
         var movement = Entity.InputDirection.Normal;
-        var angles = Camera.Rotation.Angles().WithPitch( 0 );
+
+        var angles = Entity.ViewAngles.WithPitch( 0 );
         var moveVector = Rotation.From( angles ) * movement * 320f;
         var groundEntity = CheckForGround();
 
@@ -67,18 +80,6 @@ public class PawnController : EntityComponent<Pawn>
         }
 
         Entity.GroundEntity = groundEntity;
-    }
-
-    [TheOrangeRunEvent.GameState.OrangeRun.Entry]
-    protected void OnEnterOrangeRunState()
-    {
-        _canMove = true;
-    }
-
-    [TheOrangeRunEvent.GameState.OrangeRun.Leave]
-    protected void OnLeaveOrangeRunState()
-    {
-        _canMove = false;
     }
 
     void DoJump()
