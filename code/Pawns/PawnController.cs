@@ -73,7 +73,7 @@ public class PawnController : EntityComponent<Pawn>
             Entity.Position = Grounded ? StayOnGround( mh.Position ) : mh.Position;
             Entity.Velocity = mh.Velocity;
         }
-        else if ( mh.TryUnstuck() )
+        else if (Entity.Velocity != Vector3.Zero && mh.TryUnstuck() )
         {
             Entity.Position = mh.Position;
             Entity.Velocity = mh.Velocity;

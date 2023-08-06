@@ -290,11 +290,12 @@ public partial class Pawn : AnimatedEntity
             maxs = maxs.WithZ( maxs.z - liftFeet );
         }
 
-        var tr = Trace.Ray( start, end )
-                    .Size( mins, maxs )
-                    .WithAnyTags( "solid", "playerclip", "passbullets" )
-                    .Ignore( this )
-                    .Run();
+        var tr = Trace
+            .Ray( start, end )
+            .Size( mins, maxs )
+            .WithAnyTags( "solid", "playerclip", "passbullets" )
+            .Ignore( this )
+            .Run();
 
         return tr;
     }
