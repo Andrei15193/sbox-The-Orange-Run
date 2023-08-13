@@ -1,5 +1,6 @@
 Hud {
     pointer-events: none;
+    font-family: Roboto;
 
     .pointer-visible {
         pointer-events: all;
@@ -17,12 +18,80 @@ Hud {
         flex-direction: column;
 
         label {
-            font-family: Roboto;
             color: white;
             font-size: 32px;
 
             &.subtitle {
                 font-size: 16px;
+            }
+        }
+    }
+
+    .game-states-view {
+        position: absolute;
+        top: 60px;
+        right: 60px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        .game-states-header {
+            margin-bottom: 6px;
+            padding: 0 20px;
+            color: orange;
+            font-size: 30px;
+            text-stroke: 2px black;
+
+            >.label {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .game-states-list {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+
+            overflow: hidden;
+            border-radius: 20px;
+            width: 300px;
+            color: white;
+
+            .game-state {
+                overflow: hidden;
+
+                padding: 0 10px;
+                height: 80px;
+                background-color: orange;
+
+                opacity: 0.1;
+                font-size: 30px;
+                transition: height 1s, opacity 1s;
+
+                >.label {
+                    padding: 20px 0;
+                    width: 100%;
+
+                    font-weight: bold;
+                    text-align: center;
+                }
+
+                &.active {
+                    opacity: 0.7;
+                    font-size: 40px;
+                    transition: opacity 0.7s, font-size 0.5s;
+                }
+
+                &.inactive {
+                    height: 0;
+                    font-size: 40px;
+                }
+
+                &.hidden {
+                    height: 0;
+                }
             }
         }
     }
@@ -103,7 +172,6 @@ Hud {
         bottom: 30px;
         right: 30px;
         font-size: 70px;
-        font-family: Roboto;
         color: white;
         text-stroke: 10px black;
     }

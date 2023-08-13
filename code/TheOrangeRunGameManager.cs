@@ -541,7 +541,7 @@ public partial class TheOrangeRunGameManager : GameManager
         { GameState.Starting, (TheOrangeRunEvent.GameState.Starting.Entry, TheOrangeRunEvent.GameState.Starting.Leave) },
         { GameState.Lobby, (TheOrangeRunEvent.GameState.Lobby.Entry, TheOrangeRunEvent.GameState.Lobby.Leave) },
         { GameState.OrangeRun, (TheOrangeRunEvent.GameState.OrangeRun.Entry, TheOrangeRunEvent.GameState.OrangeRun.Leave) },
-        { GameState.Leaderboards, (TheOrangeRunEvent.GameState.Leaderboards.Entry, TheOrangeRunEvent.GameState.Leaderboards.Leave) }
+        { GameState.Leaderboard, (TheOrangeRunEvent.GameState.Leaderboards.Entry, TheOrangeRunEvent.GameState.Leaderboards.Leave) }
     };
 
     public GameState State
@@ -589,7 +589,7 @@ public partial class TheOrangeRunGameManager : GameManager
             ChatBox.Say( $"1 second left..." );
             await GameTask.DelayRealtimeSeconds( 1 );
 
-            State = GameState.Leaderboards;
+            State = GameState.Leaderboard;
             Sound.FromScreen( Sounds.Events.TheOrangeRunEnded );
             var winner = PlayerPawns
                 .OrderByDescending( pawn => pawn.CollectedOrangesCount )

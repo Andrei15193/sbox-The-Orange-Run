@@ -20,7 +20,17 @@
         <label class="subtitle">Collect oranges and drop them at the boxes near spawn.</label>
     </div>
 
-    @if (Pawn.IsScoreScreenVisible || TheOrangeRunGameManager.Current.State == GameState.Leaderboards)
+    <div class="game-states-view">
+        <div class="game-states-header">Game State</div>
+        <div class="game-states-list" id="gameStatesList">
+            <div class="game-state active">Lobby</div>
+            <div class="game-state">Orange Run</div>
+            <div class="game-state">Leaderboard</div>
+            <div class="game-state hidden">Lobby</div>
+        </div>
+    </div>
+
+    @if (Pawn.IsScoreScreenVisible || TheOrangeRunGameManager.Current.State == GameState.Leaderboard)
     {
         <table class="users-list">
             <tr>
@@ -44,10 +54,11 @@
 
 @code
 {
+    private GameState _gameState = GameState.Lobby;
     private ISet<ChatEntry> _chatEntries = new HashSet<ChatEntry>();
 
     private IClient Client
-        => Game.LocalClient;
+    => Game.LocalClient;
 
     private Pawn Pawn
         => (Pawn)Game.LocalPawn;
@@ -94,6 +105,19 @@
 
     public override void Tick()
     {
+        switch (GameManager.State)
+        {
+            case GameState.Lobby:
+            case GameState.OrangeRun:
+            case GameState.Leaderboard:
+                if (_gameState != GameManager.State)
+                {
+                    _GameStateChanged(GameManager.State);
+                    _gameState = GameManager.State;
+                }
+                break;
+        }
+
         var chatEntries = ChildrenOfType<ChatBox>()
             .Single()
             .ChildrenOfType<Panel>()
@@ -107,5 +131,42 @@
 
         var devCam = Game.LocalClient.Components.Get<DevCamera>();
         SetClass("camera-movement", Input.UsingController || Input.Down("attack2") || devCam is not null);
+    }
+
+    private void _GameStateChanged(GameState gameState)
+    {
+        var gameStatesList = Descendants.SingleOrDefault(panel => panel.Id == "gameStatesList");
+        if (gameStatesList is not null)
+        {
+            var childrenOffset = 0;
+            if (gameStatesList.ChildrenCount > 4)
+            {
+                childrenOffset = 1;
+                gameStatesList.Children.First().Delete();
+            }
+
+            var previousStateElement = gameStatesList.Children.ElementAt(childrenOffset + 0);
+            previousStateElement.Classes = "game-state inactive";
+
+            var currentStateElement = gameStatesList.Children.ElementAt(childrenOffset + 1);
+            currentStateElement.Classes = "game-state active";
+
+            var hiddenStateElement = gameStatesList.Children.Last();
+            hiddenStateElement.Classes = "game-state";
+
+            var futureGameState = gameStatesList.AddChild<Panel>("game-state hidden");
+            futureGameState.AddChild(
+                new Label
+                    {
+                        Text = gameState switch
+                        {
+                            GameState.Lobby => "Lobby",
+                            GameState.OrangeRun => "Orange Run",
+                            GameState.Leaderboard => "Leaderboard",
+                            _ => throw new InvalidOperationException($"Unhandled game state on UI transition view: {gameState}")
+                        }
+                    }
+            );
+        }
     }
 }
