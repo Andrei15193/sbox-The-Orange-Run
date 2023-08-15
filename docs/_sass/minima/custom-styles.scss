@@ -3,3 +3,7 @@
   top: 0;
   background-color: $background-color;
 }
+
+h3 > a {
+  width: fit-content;
+}
