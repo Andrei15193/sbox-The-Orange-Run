@@ -5,17 +5,11 @@
 @using Sandbox.Menu;
 
 @inherits RootPanel
-@implements Sandbox.Menu.ILoadingScreenPanel
+@implements ILoadingScreenPanel
 @attribute [StyleSheet]
 
-<root style="flex-direction: column;">
-    <div class="background" />
-
-    <div style="flex-grow: 1;" />
-
-    <div class="controls" style="flex-direction: row; justify-content: center;">
-        <a class="button">@(Progress.Title ?? "Loading...")</a>
-    </div>
+<root>
+    @(Progress.Title ?? "Loading...")
 </root>
 
 @code

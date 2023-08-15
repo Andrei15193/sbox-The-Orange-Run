@@ -7,28 +7,55 @@
 @using Sandbox.Services;
 @using Sandbox.UI;
 
+@implements INavigatorPage
+@attribute [StyleSheet]
+
 <root>
-    <label class="game-title">
-        @Game.Menu.Package.Title
-    </label>
+    <h1>@Game.Menu.Package.Title</h1>
 
-    <div class="controls">
-        <div class="span">
-            <label>Showing @Servers.Count() @(Servers.Count() == 1 ? "game" : "games")</label>
-            <i class="with-click" tooltip="Refresh lobbies" @onclick=@RefreshServers>refresh</i>
+    <div class="row panels-row">
+        <div class="column panel server-browser-column">
+            <div class="row">
+                <div class="column fill">
+                    <label>Showing @Servers.Count() @(Servers.Count() == 1 ? "game" : "games")</label>
+                </div>
+                <div class="column">
+                    <i class="button @(IsRefreshing ? " disabled" : "")" tooltip="Refresh games" @onclick=@RefreshServers>refresh</i>
+                </div>
+            </div>
+            <div class="fill">
+                <div class="scroll">
+                    @foreach (var server in Servers)
+                    {
+                        <a class="button" @onclick=@( () => Join( server ) )>
+                            @server.Name (@server.Players/@server.MaxPlayers) - ping: @server.Ping
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <a class="button" @onclick=@CreateGameAsync>Create Game</a>
+            <a class="button" onclick=@Game.Menu.Close>Quit</a>
         </div>
 
-        <div class="scroll">
-            @foreach (var server in Servers)
-            {
-                <a class="button" @onclick=@( () => Join( server ) )>@server.Name (@server.Players/@server.MaxPlayers)</a>
-            }
+        <div class="column panel about-column">
+            <h2>About</h2>
+            <ul>
+                <li>Run around grabbing oranges and dropping them near spawn.</li>
+                <li>The player with most oranges collected (dropped) wins.</li>
+                <li>The game runs on a loop, await completion of the current run.</li>
+                <li>This game is still in development, feedback is always welcomed.</li>
+                <li>Enjoy!</li>
+            </ul>
         </div>
 
-        <div class="spacer" />
-
-        <a class="button" @onclick=@CreateGameAsync>Create Game</a>
-        <a class="button" onclick=@Game.Menu.Close>Quit</a>
+        <div class="column panel upcoming-changes-column">
+            <h2>Upcoming Changes</h2>
+            <ul>
+                <li>Rewards for reaching difficult areas of the map.</li>
+                <li>Voting system for starting the game.</li>
+            </ul>
+        </div>
     </div>
 </root>
 
@@ -36,12 +63,22 @@
 {
     private readonly ServerList _serverList = new ServerList();
 
+    public void OnNavigationOpen()
+        => RefreshServers();
+
+    public bool IsRefreshing
+        => _serverList.IsQuerying;
+
     public IEnumerable<ServerList.Entry> Servers
         => _serverList
-            .Where(server => server.Game == Game.Menu.Package.FullIdent);
+            .Where(server => server.Game == Game.Menu.Package.FullIdent)
+            .OrderBy(server => server.Ping);
 
     public void RefreshServers()
-        => _serverList.Query();
+    {
+        if (!_serverList.IsQuerying)
+            _serverList.Query();
+    }
 
     public async void CreateGameAsync()
     {
@@ -56,9 +93,17 @@
     }
 
     protected override int BuildHash()
-    => Servers
-        .Aggregate(
+    => HashCode.Combine(
+        _serverList.IsQuerying,
+        Servers.Aggregate(
             0,
-            (hashCode, server) => HashCode.Combine(hashCode, server.SteamId)
-        );
+            (hashCode, server) => HashCode.Combine(
+                hashCode,
+                server.SteamId,
+                server.Players,
+                server.MaxPlayers,
+                server.Ping
+            )
+        )
+    );
 }

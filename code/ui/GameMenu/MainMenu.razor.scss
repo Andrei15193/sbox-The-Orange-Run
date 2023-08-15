@@ -1,33 +1,16 @@
-
 MainMenu {
-    background-color: #262934;
-    padding: 128px 128px;
-    opacity: 1;
+    display: flex;
     flex-direction: column;
-    font-size: 25px;
+    align-items: stretch;
+
+    padding: 128px;
     width: 100%;
     height: 100%;
-    position: absolute;
-    transition: all 0.3s ease-out;
-    color: rgba( white, 0.8 );
+    background: url('assets/images/menu-background.png') repeat top;
 
-    .background {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-image: url( https://files.facepunch.com/tony/1b1311b1/boxes.webm );
-        opacity: 0.2;
-        background-size: cover;
-        filter: blur( 20px );
-        mask: linear-gradient( 45deg, white, white, black );
-        mask-scope: filter;
-        background-repeat: no-repeat;
-    }
-
-    &:intro {
-        opacity: 0;
-        transform: scaleX( 1.1 );
-    }
+    font-size: 25px;
+    font-family: Roboto;
+    color: rgba( 255, 255, 255, 0.95 );
 
     &.ingame {
         background-color: #262934ee;
@@ -39,129 +22,117 @@ MainMenu {
     }
 
     .scroll {
+        display: flex;
         flex-direction: column;
-        max-height: 386px;
-        overflow: scroll;
-        gap: 50px;
-    }
-
-    .spacer {
-        height: 1px;
-        background-image: linear-gradient( to right, rgba( white, 0.4 ), rgba( white, 0 ) );
-        width: 512px;
-        margin: 16px 0px;
-    }
-
-    .game-title {
-        font-family: Roboto Condensed;
-        font-weight: 700;
-        font-size: 70px;
-        color: rgba( white, 1 );
-        padding-bottom: 64px;
-    }
-
-    .col {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .controls {
-        flex-direction: column;
-        gap: 50px;
         align-items: flex-start;
-        text-transform: uppercase;
 
-        a, .button {
-            font-family: Roboto;
+        gap: 30px;
 
-            &:hover {
-                color: rgba( white, 1 );
-                font-weight: 900;
-                sound-in: ui.button.over;
-                cursor: pointer;
-            }
+        border: 1px solid rgba( 255, 255, 255, 0.4 );
+        border-left-width: 0;
+        border-right-width: 0;
+        padding: 10px 0 15px;
 
-            &:active {
-                sound-in: ui.button.press;
-            }
+        width: 100%;
+        overflow: scroll;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        .span {
-            gap: 128px;
+        .fill {
+            flex: 1 1 auto;
+        }
+
+        &.panels-row {
+            gap: 40px;
+            height: 100%;
         }
     }
 
+    .server-browser-column {
+        gap: 20px;
+        padding-bottom: 30px;
+        width: 50%;
+    }
+
+    .about-column,
+    .upcoming-changes-column {
+        width: 20%;
+    }
+
+
+    .panel {
+        padding: 20px;
+        background-color: rgba( 255, 127, 39, 0.4);
+    }
     .navigator-canvas {
+        display: flex;
         flex-direction: column;
         height: 100%;
-        flex-grow: 1;
-        flex-shrink: 0;
+        width: 100%;
     }
 
     .navigator-body {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
+        display: flex;
         flex-direction: column;
-        justify-content: center;
-        transition: opacity 0.15s ease-out;
+        align-items: stretch;
+
+        width: 100%;
 
         &.hidden {
-            opacity: 0;
+            display: none;
         }
     }
 }
 
-FormGroup {
-    flex-direction: column;
-    min-width: 300px;
-    gap: 16px;
+h1 {
+    font-weight: 700;
+    font-size: 70px;
+    color: rgba( 255, 255, 255, 1 );
+    margin-bottom: 64px;
 }
 
-SlimPackageCard {
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
-
-    > i {
-        &:hover {
-            cursor: pointer;
-            color: white;
-            transform: scale( 1.1 );
-            sound-in: ui.button.over;
-        }
-
-        &:active {
-            sound-in: ui.button.press;
-        }
-    }
+h2 {
+    font-weight: 500;
+    font-size: 40px;
+    color: rgba( 255, 255, 255, 1 );
+    margin-bottom: 20px;
 }
 
 i {
     font-family: Material Icons;
     text-transform: lowercase;
 
-    &.with-click {
-        &:hover {
-            cursor: pointer;
-            color: white;
-            transform: scale( 1.1 );
-            sound-in: ui.button.over;
+    &.button {
+        &.disabled {
+            color: rgba( 255, 255, 255, 0.6 );
         }
 
-        &:active {
-            sound-in: ui.button.press;
+        &:not(.disabled):hover {
+            cursor: pointer;
+            color: rgba( 255, 255, 255, 1 );
+            transform: scale( 1.2 );
         }
     }
 }
 
-.avatar {
-    width: 64px;
-    height: 64px;
+a:hover {
+    cursor: pointer;
+    font-weight: 600;
+}
 
-    &:hover {
-        border: 1px solid white;
-    }
+ul {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
 }

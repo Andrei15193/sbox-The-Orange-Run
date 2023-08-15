@@ -6,8 +6,7 @@
 @implements Sandbox.Menu.IGameMenuPanel
 @attribute [StyleSheet]
 
-<root style="flex-direction: column;">
-    <div class="background" />
+<root>
     <div class="navigator-canvas" slot="navigator-canvas" />
 </root>
 
@@ -32,5 +31,5 @@
         => Navigate("/");
 
     protected override int BuildHash()
-        => HashCode.Combine(Game.InGame, Game.Menu.Lobby, Game.Menu.Lobby?.Map);
+        => HashCode.Combine(Game.InGame);
 }
